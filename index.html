@@ -1,118 +1,164 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Repositorio de Casos de Éxito</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Repositorio Casos de Éxito</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <header>
-    <h1>Repositorio de Casos de Éxito</h1>
+<body class="bg-gray-100 text-gray-800 font-sans">
+  <!-- Encabezado principal -->
+  <header class="bg-blue-900 text-white p-6 flex flex-col sm:flex-row justify-between items-center rounded-xl shadow">
+    <h1 class="text-2xl font-bold mb-4 sm:mb-0">Casos de Éxito – Epidata</h1>
+    <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto items-center">
+      <input id="searchInput" type="text" placeholder="Buscar caso..." class="px-4 py-2 rounded-md text-black w-full sm:w-64"/>
+      <div class="flex gap-2">
+        <button id="gridViewBtn" class="px-3 py-2 bg-white text-blue-900 rounded-md shadow ring-2 ring-blue-300">🔲 Cuadrícula</button>
+        <button id="listViewBtn" class="px-3 py-2 bg-white text-blue-900 rounded-md shadow">📄 Lista</button>
+      </div>
+    </div>
   </header>
 
-  <section class="filters">
-    <input type="text" id="searchInput" placeholder="Buscar por nombre, partner..." />
-    <select id="partnerFilter">
-      <option value="">Todos los Partners</option>
-    </select>
-    <select id="areaFilter">
-      <option value="">Todas las Áreas</option>
-    </select>
-    <select id="sectorFilter">
-      <option value="">Todos los Sectores</option>
-    </select>
-    <div class="view-buttons">
-      <button id="gridViewBtn">🟦 Cuadrícula</button>
-      <button id="listViewBtn">📄 Lista</button>
+  <!-- Sección de filtros -->
+  <section class="p-6">
+    <h2 class="text-xl font-semibold mb-4">Filtrar por:</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div>
+        <label class="block mb-1 font-medium">Partner</label>
+        <select id="partnerFilter" class="w-full p-2 rounded-md border border-gray-300">
+          <option value="">Todos</option>
+          <option value="Salesforce">Salesforce</option>
+          <option value="Microsoft">Microsoft</option>
+          <option value="MuleSoft">MuleSoft</option>
+          <option value="Datadog">Datadog</option>
+          <option value="GitLab">GitLab</option>
+          <option value="UiPath">UiPath</option>
+          <option value="Red Hat">Red Hat</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block mb-1 font-medium">Área</label>
+        <select id="areaFilter" class="w-full p-2 rounded-md border border-gray-300">
+          <option value="">Todos</option>
+          <option value="Arquitectura de Software e Integración de Aplicaciones">Arquitectura de Software e Integración de Aplicaciones</option>
+          <option value="DevOps">DevOps</option>
+          <option value="UX/UI">UX/UI</option>
+          <option value="RPA & Automation">RPA & Automation</option>
+          <option value="ITOM">ITOM</option>
+          <option value="Digital Transformation y Co-Innovation Labs">Digital Transformation y Co-Innovation Labs</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block mb-1 font-medium">Sector</label>
+        <select id="sectorFilter" class="w-full p-2 rounded-md border border-gray-300">
+          <option value="">Todos</option>
+          <option value="Educación">Educación</option>
+          <option value="Retail">Retail</option>
+          <option value="Gobierno">Gobierno</option>
+          <option value="Servicios financieros">Servicios financieros</option>
+          <option value="Healthcare">Healthcare</option>
+          <option value="Telco & Media">Telco & Media</option>
+        </select>
+      </div>
     </div>
+
+    <!-- Contenedor de cards -->
+    <div id="cardsContainer" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></div>
   </section>
 
-  <section id="casosContainer" class="grid-view"></section>
-
   <script>
-    let data = [];
-    const container = document.getElementById("casosContainer");
+    const searchInput = document.getElementById("searchInput");
+    const partnerFilter = document.getElementById("partnerFilter");
+    const areaFilter = document.getElementById("areaFilter");
+    const sectorFilter = document.getElementById("sectorFilter");
+    const cardsContainer = document.getElementById("cardsContainer");
 
-    async function fetchData() {
-      const res = await fetch("data.json");
-      data = await res.json();
-      populateFilters();
-      renderCasos(data);
-    }
+    const gridViewBtn = document.getElementById("gridViewBtn");
+    const listViewBtn = document.getElementById("listViewBtn");
 
-    function populateFilters() {
-      const partnerSet = new Set();
-      const areaSet = new Set();
-      const sectorSet = new Set();
+    let vistaActual = "grid"; // grid o list
+    let casos = [];
 
-      data.forEach(caso => {
-        partnerSet.add(caso.partner);
-        areaSet.add(caso.area);
-        sectorSet.add(caso.sector);
-      });
+    gridViewBtn.addEventListener("click", () => {
+      vistaActual = "grid";
+      renderCards();
+      gridViewBtn.classList.add("ring-2", "ring-blue-300");
+      listViewBtn.classList.remove("ring-2", "ring-blue-300");
+    });
 
-      fillSelect("partnerFilter", partnerSet);
-      fillSelect("areaFilter", areaSet);
-      fillSelect("sectorFilter", sectorSet);
-    }
+    listViewBtn.addEventListener("click", () => {
+      vistaActual = "list";
+      renderCards();
+      listViewBtn.classList.add("ring-2", "ring-blue-300");
+      gridViewBtn.classList.remove("ring-2", "ring-blue-300");
+    });
 
-    function fillSelect(id, set) {
-      const select = document.getElementById(id);
-      set.forEach(value => {
-        const option = document.createElement("option");
-        option.value = value;
-        option.textContent = value;
-        select.appendChild(option);
-      });
-    }
+    function crearCard(caso, modoLista = false) {
+      const card = document.createElement("div");
 
-    function renderCasos(casos) {
-      container.innerHTML = "";
-      casos.forEach(caso => {
-        const div = document.createElement("div");
-        div.className = "caso-card";
-        div.innerHTML = `
-          <h3>${caso.nombre}</h3>
-          <p><strong>Partner:</strong> ${caso.partner}</p>
-          <p><strong>Área:</strong> ${caso.area}</p>
-          <p><strong>Sector:</strong> ${caso.sector}</p>
-          <a href="${caso.url}" target="_blank">Ver caso</a>
+      if (modoLista) {
+        card.className = "bg-white p-4 rounded-lg shadow flex flex-col sm:flex-row items-start gap-4";
+        card.innerHTML = `
+          <div class="flex-grow">
+            <h3 class="text-lg font-semibold mb-1">${caso.titulo}</h3>
+            <p class="text-sm text-gray-600">Área: ${caso.area}</p>
+            <p class="text-sm text-gray-600">Sector: ${caso.sector}</p>
+          </div>
+          <div>
+            <a href="${caso.url}" target="_blank" class="text-blue-600 font-medium hover:underline">Ver presentación</a>
+          </div>
         `;
-        container.appendChild(div);
+      } else {
+        card.className = "bg-white p-5 rounded-xl shadow hover:shadow-lg transition";
+        card.innerHTML = `
+          <img src="${caso.thumbnail}" alt="Thumbnail" class="mb-3 w-full rounded-md max-h-40 object-cover"/>
+          <h3 class="text-lg font-semibold mb-1">${caso.titulo}</h3>
+          <p class="text-sm text-gray-600">Área: ${caso.area}</p>
+          <p class="text-sm text-gray-600 mb-2">Sector: ${caso.sector}</p>
+          <a href="${caso.url}" target="_blank" class="text-blue-600 font-medium hover:underline">Ver presentación</a>
+        `;
+      }
+
+      return card;
+    }
+
+    function renderCards() {
+      cardsContainer.innerHTML = "";
+
+      const searchText = searchInput.value.toLowerCase();
+      const selectedPartner = partnerFilter.value;
+      const selectedArea = areaFilter.value;
+      const selectedSector = sectorFilter.value;
+
+      cardsContainer.className = vistaActual === "grid"
+        ? "grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+        : "flex flex-col gap-4";
+
+      casos.forEach(caso => {
+        const matchesSearch = caso.titulo.toLowerCase().includes(searchText);
+        const matchesPartner = !selectedPartner || caso.partner === selectedPartner;
+        const matchesArea = !selectedArea || caso.area === selectedArea;
+        const matchesSector = !selectedSector || caso.sector === selectedSector;
+
+        if (matchesSearch && matchesPartner && matchesArea && matchesSector) {
+          cardsContainer.appendChild(crearCard(caso, vistaActual === "list"));
+        }
       });
     }
 
-    function applyFilters() {
-      const search = document.getElementById("searchInput").value.toLowerCase();
-      const partner = document.getElementById("partnerFilter").value;
-      const area = document.getElementById("areaFilter").value;
-      const sector = document.getElementById("sectorFilter").value;
+    fetch("casos.json")
+      .then(response => response.json())
+      .then(data => {
+        casos = data;
+        renderCards();
+      });
 
-      const filtered = data.filter(caso =>
-        (!search || caso.nombre.toLowerCase().includes(search) || caso.partner.toLowerCase().includes(search)) &&
-        (!partner || caso.partner === partner) &&
-        (!area || caso.area === area) &&
-        (!sector || caso.sector === sector)
-      );
-
-      renderCasos(filtered);
-    }
-
-    document.getElementById("searchInput").addEventListener("input", applyFilters);
-    document.getElementById("partnerFilter").addEventListener("change", applyFilters);
-    document.getElementById("areaFilter").addEventListener("change", applyFilters);
-    document.getElementById("sectorFilter").addEventListener("change", applyFilters);
-    document.getElementById("gridViewBtn").addEventListener("click", () => {
-      container.classList.add("grid-view");
-      container.classList.remove("list-view");
-    });
-    document.getElementById("listViewBtn").addEventListener("click", () => {
-      container.classList.add("list-view");
-      container.classList.remove("grid-view");
-    });
-
-    fetchData();
+    searchInput.addEventListener("input", renderCards);
+    partnerFilter.addEventListener("change", renderCards);
+    areaFilter.addEventListener("change", renderCards);
+    sectorFilter.addEventListener("change", renderCards);
   </script>
 </body>
 </html>

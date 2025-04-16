@@ -1,26 +1,42 @@
 [
   {
-    "nombre": "Caso 1 - Walmart",
+    "titulo": "Transformación digital en universidad pública",
     "partner": "Microsoft",
-    "area": "Modernización de Aplicaciones",
+    "area": "Digital Transformation y Co-Innovation Labs",
+    "sector": "Educación",
+    "url": "https://docs.google.com/presentation/d/1vpzunmE7ewGzrQmXFXDjpwT3zJ9tOSQaUtj_ADtloZg/edit?usp=sharing",
+    "thumbnail": "https://drive.google.com/thumbnail?id=1vpzunmE7ewGzrQmXFXDjpwT3zJ9tOSQaUtj_ADtloZg"
+  },
+  {
+    "titulo": "Automatización de procesos en banca digital",
+    "partner": "UiPath",
+    "area": "RPA & Automation",
+    "sector": "Servicios financieros",
+    "url": "https://docs.google.com/presentation/d/1vpzunmE7ewGzrQmXFXDjpwT3zJ9tOSQaUtj_ADtloZg/edit?usp=sharing",
+    "thumbnail": "https://drive.google.com/thumbnail?id=1vpzunmE7ewGzrQmXFXDjpwT3zJ9tOSQaUtj_ADtloZg"
+  },
+  {
+    "titulo": "Optimización DevOps con GitLab en empresa retail",
+    "partner": "GitLab",
+    "area": "DevOps",
     "sector": "Retail",
-    "link": "https://docs.google.com/presentation/d/1abc123",
-    "thumbnail": "https://via.placeholder.com/300x180.png?text=Caso+1"
+    "url": "https://docs.google.com/presentation/d/1vpzunmE7ewGzrQmXFXDjpwT3zJ9tOSQaUtj_ADtloZg/edit?usp=sharing",
+    "thumbnail": "https://drive.google.com/thumbnail?id=1vpzunmE7ewGzrQmXFXDjpwT3zJ9tOSQaUtj_ADtloZg"
   },
   {
-    "nombre": "Caso 2 - JP Morgan",
-    "partner": "Salesforce",
-    "area": "Automatización (RPA)",
-    "sector": "Finanzas",
-    "link": "https://docs.google.com/presentation/d/2def456",
-    "thumbnail": "https://via.placeholder.com/300x180.png?text=Caso+2"
+    "titulo": "Modernización UX/UI para app de salud",
+    "partner": "Red Hat",
+    "area": "UX/UI",
+    "sector": "Healthcare",
+    "url": "https://docs.google.com/presentation/d/1vpzunmE7ewGzrQmXFXDjpwT3zJ9tOSQaUtj_ADtloZg/edit?usp=sharing",
+    "thumbnail": "https://drive.google.com/thumbnail?id=1vpzunmE7ewGzrQmXFXDjpwT3zJ9tOSQaUtj_ADtloZg"
   },
   {
-    "nombre": "Caso 3 - Telecom",
-    "partner": "Oracle",
-    "area": "Big Data",
-    "sector": "Telecomunicaciones",
-    "link": "https://docs.google.com/presentation/d/3ghi789",
-    "thumbnail": "https://via.placeholder.com/300x180.png?text=Caso+3"
+    "titulo": "Integración de sistemas para gobierno digital",
+    "partner": "MuleSoft",
+    "area": "Arquitectura de Software e Integración de Aplicaciones",
+    "sector": "Gobierno",
+    "url": "https://docs.google.com/presentation/d/1vpzunmE7ewGzrQmXFXDjpwT3zJ9tOSQaUtj_ADtloZg/edit?usp=sharing",
+    "thumbnail": "https://drive.google.com/thumbnail?id=1vpzunmE7ewGzrQmXFXDjpwT3zJ9tOSQaUtj_ADtloZg"
   }
 ]
