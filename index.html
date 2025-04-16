@@ -4,113 +4,115 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Repositorio de Casos de Éxito</title>
-  <link rel="stylesheet" href="estilos.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Repositorio de Casos de Éxito</h1>
+  <header>
+    <h1>Repositorio de Casos de Éxito</h1>
+  </header>
 
-  <div class="filtros">
-    <input type="text" id="busqueda" placeholder="Buscar por nombre, partner" />
-    <select id="filtroPartner">
+  <section class="filters">
+    <input type="text" id="searchInput" placeholder="Buscar por nombre, partner..." />
+    <select id="partnerFilter">
       <option value="">Todos los Partners</option>
     </select>
-    <select id="filtroArea">
+    <select id="areaFilter">
       <option value="">Todas las Áreas</option>
     </select>
-    <select id="filtroSector">
+    <select id="sectorFilter">
       <option value="">Todos los Sectores</option>
     </select>
-  </div>
+    <div class="view-buttons">
+      <button id="gridViewBtn">🟦 Cuadrícula</button>
+      <button id="listViewBtn">📄 Lista</button>
+    </div>
+  </section>
 
-  <div class="vista-toggle">
-    <button onclick="cambiarVista('cuadricula')">Cuadrícula</button>
-    <button onclick="cambiarVista('lista')">Lista</button>
-  </div>
-
-  <div id="contenedorCasos" class="cuadricula"></div>
+  <section id="casosContainer" class="grid-view"></section>
 
   <script>
-    let vistaActual = 'cuadricula';
+    let data = [];
+    const container = document.getElementById("casosContainer");
 
-    function cambiarVista(vista) {
-      vistaActual = vista;
-      document.getElementById('contenedorCasos').className = vista;
-      mostrarCasos();
+    async function fetchData() {
+      const res = await fetch("data.json");
+      data = await res.json();
+      populateFilters();
+      renderCasos(data);
     }
 
-    let casos = [];
+    function populateFilters() {
+      const partnerSet = new Set();
+      const areaSet = new Set();
+      const sectorSet = new Set();
 
-    fetch('casos.json')
-      .then(response => response.json())
-      .then(data => {
-        casos = data;
-        cargarFiltros();
-        mostrarCasos();
+      data.forEach(caso => {
+        partnerSet.add(caso.partner);
+        areaSet.add(caso.area);
+        sectorSet.add(caso.sector);
       });
 
-    function cargarFiltros() {
-      const partners = new Set();
-      const areas = new Set();
-      const sectores = new Set();
+      fillSelect("partnerFilter", partnerSet);
+      fillSelect("areaFilter", areaSet);
+      fillSelect("sectorFilter", sectorSet);
+    }
 
+    function fillSelect(id, set) {
+      const select = document.getElementById(id);
+      set.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+      });
+    }
+
+    function renderCasos(casos) {
+      container.innerHTML = "";
       casos.forEach(caso => {
-        partners.add(caso.partner);
-        areas.add(caso.area);
-        sectores.add(caso.sector);
-      });
-
-      partners.forEach(p => agregarOpcion('filtroPartner', p));
-      areas.forEach(a => agregarOpcion('filtroArea', a));
-      sectores.forEach(s => agregarOpcion('filtroSector', s));
-    }
-
-    function agregarOpcion(idSelect, valor) {
-      const select = document.getElementById(idSelect);
-      const option = document.createElement('option');
-      option.value = valor;
-      option.textContent = valor;
-      select.appendChild(option);
-    }
-
-    function mostrarCasos() {
-      const contenedor = document.getElementById('contenedorCasos');
-      contenedor.innerHTML = '';
-
-      const textoBusqueda = document.getElementById('busqueda').value.toLowerCase();
-      const filtroPartner = document.getElementById('filtroPartner').value;
-      const filtroArea = document.getElementById('filtroArea').value;
-      const filtroSector = document.getElementById('filtroSector').value;
-
-      const filtrados = casos.filter(caso =>
-        (!textoBusqueda || caso.nombre.toLowerCase().includes(textoBusqueda) || caso.partner.toLowerCase().includes(textoBusqueda)) &&
-        (!filtroPartner || caso.partner === filtroPartner) &&
-        (!filtroArea || caso.area === filtroArea) &&
-        (!filtroSector || caso.sector === filtroSector)
-      );
-
-      filtrados.forEach(caso => {
-        const div = document.createElement('div');
-        div.className = 'caso';
-
-        const link = document.createElement('a');
-        link.href = caso.link;
-        link.target = '_blank';
-        link.textContent = caso.nombre;
-
-        div.appendChild(link);
-        div.innerHTML += `
+        const div = document.createElement("div");
+        div.className = "caso-card";
+        div.innerHTML = `
+          <h3>${caso.nombre}</h3>
           <p><strong>Partner:</strong> ${caso.partner}</p>
           <p><strong>Área:</strong> ${caso.area}</p>
           <p><strong>Sector:</strong> ${caso.sector}</p>
+          <a href="${caso.url}" target="_blank">Ver caso</a>
         `;
-        contenedor.appendChild(div);
+        container.appendChild(div);
       });
     }
 
-    document.getElementById('busqueda').addEventListener('input', mostrarCasos);
-    document.getElementById('filtroPartner').addEventListener('change', mostrarCasos);
-    document.getElementById('filtroArea').addEventListener('change', mostrarCasos);
-    document.getElementById('filtroSector').addEventListener('change', mostrarCasos);
+    function applyFilters() {
+      const search = document.getElementById("searchInput").value.toLowerCase();
+      const partner = document.getElementById("partnerFilter").value;
+      const area = document.getElementById("areaFilter").value;
+      const sector = document.getElementById("sectorFilter").value;
+
+      const filtered = data.filter(caso =>
+        (!search || caso.nombre.toLowerCase().includes(search) || caso.partner.toLowerCase().includes(search)) &&
+        (!partner || caso.partner === partner) &&
+        (!area || caso.area === area) &&
+        (!sector || caso.sector === sector)
+      );
+
+      renderCasos(filtered);
+    }
+
+    document.getElementById("searchInput").addEventListener("input", applyFilters);
+    document.getElementById("partnerFilter").addEventListener("change", applyFilters);
+    document.getElementById("areaFilter").addEventListener("change", applyFilters);
+    document.getElementById("sectorFilter").addEventListener("change", applyFilters);
+    document.getElementById("gridViewBtn").addEventListener("click", () => {
+      container.classList.add("grid-view");
+      container.classList.remove("list-view");
+    });
+    document.getElementById("listViewBtn").addEventListener("click", () => {
+      container.classList.add("list-view");
+      container.classList.remove("grid-view");
+    });
+
+    fetchData();
   </script>
 </body>
 </html>

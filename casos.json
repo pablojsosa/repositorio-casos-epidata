@@ -1,23 +1,26 @@
 [
   {
-    "nombre": "Caso de Éxito 1",
+    "nombre": "Caso 1 - Walmart",
     "partner": "Microsoft",
-    "area": "Data & Analytics",
-    "sector": "Finanzas",
-    "link": "https://ejemplo.com/caso1"
-  },
-  {
-    "nombre": "Caso de Éxito 2",
-    "partner": "Salesforce",
-    "area": "Automatización",
+    "area": "Modernización de Aplicaciones",
     "sector": "Retail",
-    "link": "https://ejemplo.com/caso2"
+    "link": "https://docs.google.com/presentation/d/1abc123",
+    "thumbnail": "https://via.placeholder.com/300x180.png?text=Caso+1"
   },
   {
-    "nombre": "Caso de Éxito 3",
-    "partner": "Red Hat",
-    "area": "Modernización",
-    "sector": "Manufactura",
-    "link": "https://ejemplo.com/caso3"
+    "nombre": "Caso 2 - JP Morgan",
+    "partner": "Salesforce",
+    "area": "Automatización (RPA)",
+    "sector": "Finanzas",
+    "link": "https://docs.google.com/presentation/d/2def456",
+    "thumbnail": "https://via.placeholder.com/300x180.png?text=Caso+2"
+  },
+  {
+    "nombre": "Caso 3 - Telecom",
+    "partner": "Oracle",
+    "area": "Big Data",
+    "sector": "Telecomunicaciones",
+    "link": "https://docs.google.com/presentation/d/3ghi789",
+    "thumbnail": "https://via.placeholder.com/300x180.png?text=Caso+3"
   }
 ]
