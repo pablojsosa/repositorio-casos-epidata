@@ -1,164 +1,156 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Repositorio Casos de Éxito</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Repositorio de Casos de Éxito - Epidata</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans">
-  <!-- Encabezado principal -->
-  <header class="bg-blue-900 text-white p-6 flex flex-col sm:flex-row justify-between items-center rounded-xl shadow">
-    <h1 class="text-2xl font-bold mb-4 sm:mb-0">Casos de Éxito – Epidata</h1>
-    <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto items-center">
-      <input id="searchInput" type="text" placeholder="Buscar caso..." class="px-4 py-2 rounded-md text-black w-full sm:w-64"/>
-      <div class="flex gap-2">
-        <button id="gridViewBtn" class="px-3 py-2 bg-white text-blue-900 rounded-md shadow ring-2 ring-blue-300">🔲 Cuadrícula</button>
-        <button id="listViewBtn" class="px-3 py-2 bg-white text-blue-900 rounded-md shadow">📄 Lista</button>
-      </div>
-    </div>
-  </header>
+<body>
+  <div class="container">
+    <h1>Repositorio de Casos de Éxito</h1>
 
-  <!-- Sección de filtros -->
-  <section class="p-6">
-    <h2 class="text-xl font-semibold mb-4">Filtrar por:</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-      <div>
-        <label class="block mb-1 font-medium">Partner</label>
-        <select id="partnerFilter" class="w-full p-2 rounded-md border border-gray-300">
-          <option value="">Todos</option>
-          <option value="Salesforce">Salesforce</option>
-          <option value="Microsoft">Microsoft</option>
-          <option value="MuleSoft">MuleSoft</option>
-          <option value="Datadog">Datadog</option>
-          <option value="GitLab">GitLab</option>
-          <option value="UiPath">UiPath</option>
-          <option value="Red Hat">Red Hat</option>
-        </select>
-      </div>
+    <div class="controls">
+      <input type="text" id="searchInput" placeholder="Buscar por nombre, partner, área o sector..." />
+      
+      <select id="partnerFilter">
+        <option value="">Todos los Partners</option>
+      </select>
+      
+      <select id="areaFilter">
+        <option value="">Todas las Áreas</option>
+      </select>
+      
+      <select id="sectorFilter">
+        <option value="">Todos los Sectores</option>
+      </select>
 
-      <div>
-        <label class="block mb-1 font-medium">Área</label>
-        <select id="areaFilter" class="w-full p-2 rounded-md border border-gray-300">
-          <option value="">Todos</option>
-          <option value="Arquitectura de Software e Integración de Aplicaciones">Arquitectura de Software e Integración de Aplicaciones</option>
-          <option value="DevOps">DevOps</option>
-          <option value="UX/UI">UX/UI</option>
-          <option value="RPA & Automation">RPA & Automation</option>
-          <option value="ITOM">ITOM</option>
-          <option value="Digital Transformation y Co-Innovation Labs">Digital Transformation y Co-Innovation Labs</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block mb-1 font-medium">Sector</label>
-        <select id="sectorFilter" class="w-full p-2 rounded-md border border-gray-300">
-          <option value="">Todos</option>
-          <option value="Educación">Educación</option>
-          <option value="Retail">Retail</option>
-          <option value="Gobierno">Gobierno</option>
-          <option value="Servicios financieros">Servicios financieros</option>
-          <option value="Healthcare">Healthcare</option>
-          <option value="Telco & Media">Telco & Media</option>
-        </select>
+      <div class="view-toggle">
+        <button id="gridViewBtn">Cuadrícula</button>
+        <button id="listViewBtn">Lista</button>
       </div>
     </div>
 
-    <!-- Contenedor de cards -->
-    <div id="cardsContainer" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></div>
-  </section>
+    <div id="casosContainer" class="grid-view"></div>
+  </div>
 
   <script>
+    let casos = [];
+    let currentView = "grid";
+
+    fetch("casos.json")
+      .then((response) => response.json())
+      .then((data) => {
+        casos = data;
+        populateFilters();
+        renderCasos();
+      });
+
     const searchInput = document.getElementById("searchInput");
     const partnerFilter = document.getElementById("partnerFilter");
     const areaFilter = document.getElementById("areaFilter");
     const sectorFilter = document.getElementById("sectorFilter");
-    const cardsContainer = document.getElementById("cardsContainer");
+    const casosContainer = document.getElementById("casosContainer");
 
     const gridViewBtn = document.getElementById("gridViewBtn");
     const listViewBtn = document.getElementById("listViewBtn");
 
-    let vistaActual = "grid"; // grid o list
-    let casos = [];
+    gridViewBtn.onclick = () => {
+      currentView = "grid";
+      casosContainer.className = "grid-view";
+      renderCasos();
+    };
 
-    gridViewBtn.addEventListener("click", () => {
-      vistaActual = "grid";
-      renderCards();
-      gridViewBtn.classList.add("ring-2", "ring-blue-300");
-      listViewBtn.classList.remove("ring-2", "ring-blue-300");
+    listViewBtn.onclick = () => {
+      currentView = "list";
+      casosContainer.className = "list-view";
+      renderCasos();
+    };
+
+    [searchInput, partnerFilter, areaFilter, sectorFilter].forEach((element) => {
+      element.addEventListener("input", renderCasos);
     });
 
-    listViewBtn.addEventListener("click", () => {
-      vistaActual = "list";
-      renderCards();
-      listViewBtn.classList.add("ring-2", "ring-blue-300");
-      gridViewBtn.classList.remove("ring-2", "ring-blue-300");
-    });
+    function populateFilters() {
+      const partners = [...new Set(casos.map(c => c.partner))];
+      const areas = [...new Set(casos.map(c => c.area))];
+      const sectores = [...new Set(casos.map(c => c.sector))];
 
-    function crearCard(caso, modoLista = false) {
-      const card = document.createElement("div");
+      partners.forEach(p => {
+        partnerFilter.innerHTML += `<option value="${p}">${p}</option>`;
+      });
 
-      if (modoLista) {
-        card.className = "bg-white p-4 rounded-lg shadow flex flex-col sm:flex-row items-start gap-4";
-        card.innerHTML = `
-          <div class="flex-grow">
-            <h3 class="text-lg font-semibold mb-1">${caso.titulo}</h3>
-            <p class="text-sm text-gray-600">Área: ${caso.area}</p>
-            <p class="text-sm text-gray-600">Sector: ${caso.sector}</p>
-          </div>
-          <div>
-            <a href="${caso.url}" target="_blank" class="text-blue-600 font-medium hover:underline">Ver presentación</a>
-          </div>
-        `;
-      } else {
-        card.className = "bg-white p-5 rounded-xl shadow hover:shadow-lg transition";
-        card.innerHTML = `
-          <img src="${caso.thumbnail}" alt="Thumbnail" class="mb-3 w-full rounded-md max-h-40 object-cover"/>
-          <h3 class="text-lg font-semibold mb-1">${caso.titulo}</h3>
-          <p class="text-sm text-gray-600">Área: ${caso.area}</p>
-          <p class="text-sm text-gray-600 mb-2">Sector: ${caso.sector}</p>
-          <a href="${caso.url}" target="_blank" class="text-blue-600 font-medium hover:underline">Ver presentación</a>
-        `;
+      areas.forEach(a => {
+        areaFilter.innerHTML += `<option value="${a}">${a}</option>`;
+      });
+
+      sectores.forEach(s => {
+        sectorFilter.innerHTML += `<option value="${s}">${s}</option>`;
+      });
+    }
+
+    function highlightMatch(text, term) {
+      if (!term) return text;
+      const regex = new RegExp(`(${term})`, "gi");
+      return text.replace(regex, '<mark>$1</mark>');
+    }
+
+    function renderCasos() {
+      const searchTerm = searchInput.value.trim().toLowerCase();
+      const partnerValue = partnerFilter.value;
+      const areaValue = areaFilter.value;
+      const sectorValue = sectorFilter.value;
+
+      const filtered = casos.filter(caso => {
+        const matchesSearch =
+          caso.nombre.toLowerCase().includes(searchTerm) ||
+          caso.partner.toLowerCase().includes(searchTerm) ||
+          caso.area.toLowerCase().includes(searchTerm) ||
+          caso.sector.toLowerCase().includes(searchTerm);
+
+        const matchesPartner = !partnerValue || caso.partner === partnerValue;
+        const matchesArea = !areaValue || caso.area === areaValue;
+        const matchesSector = !sectorValue || caso.sector === sectorValue;
+
+        return matchesSearch && matchesPartner && matchesArea && matchesSector;
+      });
+
+      casosContainer.innerHTML = "";
+
+      if (filtered.length === 0) {
+        casosContainer.innerHTML = "<p>No se encontraron casos.</p>";
+        return;
       }
 
-      return card;
-    }
+      filtered.forEach(caso => {
+        const card = document.createElement("div");
+        card.className = "caso-card";
 
-    function renderCards() {
-      cardsContainer.innerHTML = "";
+        const title = highlightMatch(caso.nombre, searchTerm);
+        const partner = highlightMatch(caso.partner, searchTerm);
+        const area = highlightMatch(caso.area, searchTerm);
+        const sector = highlightMatch(caso.sector, searchTerm);
 
-      const searchText = searchInput.value.toLowerCase();
-      const selectedPartner = partnerFilter.value;
-      const selectedArea = areaFilter.value;
-      const selectedSector = sectorFilter.value;
-
-      cardsContainer.className = vistaActual === "grid"
-        ? "grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-        : "flex flex-col gap-4";
-
-      casos.forEach(caso => {
-        const matchesSearch = caso.titulo.toLowerCase().includes(searchText);
-        const matchesPartner = !selectedPartner || caso.partner === selectedPartner;
-        const matchesArea = !selectedArea || caso.area === selectedArea;
-        const matchesSector = !selectedSector || caso.sector === selectedSector;
-
-        if (matchesSearch && matchesPartner && matchesArea && matchesSector) {
-          cardsContainer.appendChild(crearCard(caso, vistaActual === "list"));
+        if (currentView === "grid") {
+          card.innerHTML = `
+            <img src="${caso.thumbnail}" alt="Thumbnail" />
+            <h3>${title}</h3>
+            <p><strong>Partner:</strong> ${partner}</p>
+            <p><strong>Área:</strong> ${area}</p>
+            <p><strong>Sector:</strong> ${sector}</p>
+            <a href="${caso.link}" target="_blank">Ver presentación</a>
+          `;
+        } else {
+          card.innerHTML = `
+            <h3>${title}</h3>
+            <p><strong>Partner:</strong> ${partner} | <strong>Área:</strong> ${area} | <strong>Sector:</strong> ${sector}</p>
+            <a href="${caso.link}" target="_blank">Ver presentación</a>
+          `;
         }
+
+        casosContainer.appendChild(card);
       });
     }
-
-    fetch("casos.json")
-      .then(response => response.json())
-      .then(data => {
-        casos = data;
-        renderCards();
-      });
-
-    searchInput.addEventListener("input", renderCards);
-    partnerFilter.addEventListener("change", renderCards);
-    areaFilter.addEventListener("change", renderCards);
-    sectorFilter.addEventListener("change", renderCards);
   </script>
 </body>
 </html>
